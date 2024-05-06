@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"go-api-native/models"
+
 	log "github.com/sirupsen/logrus"
 
 	"gorm.io/driver/mysql"
@@ -18,6 +20,8 @@ func ConnectDB() {
 	if err != nil {
 		log.Fatal("Database failed to Connected")
 	}
+
+	db.AutoMigrate(&models.Author{})
 
 	DB = db
 	fmt.Println("Database Connected")

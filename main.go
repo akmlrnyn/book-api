@@ -16,6 +16,7 @@ func main() {
 	config.ConnectDB()
 	r := mux.NewRouter()
 
+	
 	routes.RouteIndex(r)
 
 	log.Println("Server is now running", config.ENV.DB_PORT)
