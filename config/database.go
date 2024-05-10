@@ -21,7 +21,7 @@ func ConnectDB() {
 		log.Fatal("Database failed to Connected")
 	}
 
-	db.AutoMigrate(&models.Author{})
+	db.AutoMigrate(&models.Author{}, &models.Book{})
 
 	DB = db
 	fmt.Println("Database Connected")
