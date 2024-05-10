@@ -10,4 +10,5 @@ func BookRoutes(r *mux.Router) {
 	router := r.PathPrefix("/books").Subrouter()
 
 	router.HandleFunc("", bookcontroller.Index)
+	router.HandleFunc("/create", bookcontroller.Create)
 }
