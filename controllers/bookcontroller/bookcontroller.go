@@ -80,22 +80,36 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(idParams)
 
 	var book models.Book
-	var bookResponse models.BookResponse
 
-	if err := config.DB.Joins("Author").First(&book, id).First(&bookResponse).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
+	if err := config.DB.First(&book, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			helper.Response(w, 404, "Author not found", nil)
 		}
 
-		helper.Response(w, 500, err.Error(), nil)
+		helper.Response(w, 500, "Book not found", nil)
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+	var bookPayload models.Book
+	if err := json.NewDecoder(r.Body).Decode(&bookPayload); err != nil {
 		helper.Response(w, 401, err.Error(), nil)
 		return
 	}
 
 	defer r.Body.Close()
+
+	var author models.Author
+	if bookPayload.AuthorID == 0 {
+		if err := config.DB.First(author, &bookPayload.AuthorID).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				helper.Response(w, 404, "Author not found", nil)
+				return
+			}
+
+			helper.Response(w, 500, err.Error(), nil)
+			return
+		}
+		return
+	}
 
 	if err := config.DB.Where("id = ?", id).Updates(&book).Error; err != nil {
 		helper.Response(w, 404, "Book not found", nil)
