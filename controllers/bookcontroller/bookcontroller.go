@@ -13,12 +13,14 @@ import (
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	var book []models.Book
-	if err := config.DB.Find(&book).Error; err != nil {
+	var bookResponse []models.BookResponse
+
+	if err := config.DB.Joins("Author").Find(&book).Find(&bookResponse).Error; err != nil {
 		helper.Response(w, 400, err.Error(), nil)
 		return
 	}
 
-	helper.Response(w, 200, "Book List", book)
+	helper.Response(w, 200, "Book List", bookResponse)
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -33,6 +35,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	var author models.Author
 
+	//check author
 	if err := config.DB.First(&author,book.AuthorID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			helper.Response(w, 404, "Author not found", nil)
