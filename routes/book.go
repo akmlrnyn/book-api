@@ -12,4 +12,5 @@ func BookRoutes(r *mux.Router) {
 	router.HandleFunc("", bookcontroller.Index)
 	router.HandleFunc("/create", bookcontroller.Create)
 	router.HandleFunc("/{id}/detail", bookcontroller.Detail)
+	router.HandleFunc("/{id}/update", bookcontroller.Update)
 }

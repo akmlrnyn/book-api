@@ -74,3 +74,34 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 
 	helper.Response(w, 200, "Book found", bookResponse)
 }
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	idParams := mux.Vars(r)["id"]
+	id, _ := strconv.Atoi(idParams)
+
+	var book models.Book
+	var bookResponse models.BookResponse
+
+	if err := config.DB.Joins("Author").First(&book, id).First(&bookResponse).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			helper.Response(w, 404, "Author not found", nil)
+		}
+
+		helper.Response(w, 500, err.Error(), nil)
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+		helper.Response(w, 401, err.Error(), nil)
+		return
+	}
+
+	defer r.Body.Close()
+
+	if err := config.DB.Where("id = ?", id).Updates(&book).Error; err != nil {
+		helper.Response(w, 404, "Book not found", nil)
+		return
+	}
+
+
+	helper.Response(w, 201, "Success", nil)
+}
