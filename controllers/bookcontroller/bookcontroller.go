@@ -7,7 +7,9 @@ import (
 	"go-api-native/helper"
 	"go-api-native/models"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -52,4 +54,23 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helper.Response(w, 201, "Success to create book", nil)
+}
+
+func Detail(w http.ResponseWriter, r *http.Request) {
+	idParams := mux.Vars(r)["id"]
+	id, _ := strconv.Atoi(idParams)
+
+	var book models.Book
+	var bookResponse models.BookResponse
+
+	if err := config.DB.Joins("Author").First(&book, id).First(&bookResponse).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			helper.Response(w, 404, "Book not found", nil)
+			return
+		}
+		helper.Response(w, 500, err.Error(), nil)
+	
+	}
+
+	helper.Response(w, 200, "Book found", bookResponse)
 }
